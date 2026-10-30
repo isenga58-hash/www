@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muhamad Asep, NIM 052543277</title>
+<style>
+:root{
+  --bg:#f4f7fb; --card:#fff; --text:#172033; --muted:#667085;
+  --primary:#2563eb; --primary2:#1d4ed8; --border:#e5e7eb;
+  --shadow:0 14px 35px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.container{width:min(1100px,92%);margin:auto}
+header{background:linear-gradient(135deg,#1d4ed8,#2563eb 55%,#38bdf8);color:white;padding:42px 0 54px}
+.badge{display:inline-block;background:rgba(255,255,255,.18);padding:7px 12px;border-radius:999px;font-size:13px;margin-bottom:15px}
+h1{margin:0;font-size:clamp(28px,5vw,46px);letter-spacing:-1px}
+.subtitle{margin:12px 0 0;opacity:.9;font-size:16px}
+.profile{margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.profile div{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);padding:14px 16px;border-radius:12px}
+.profile small{display:block;opacity:.75;margin-bottom:5px}
+main{padding:28px 0 45px}
+.grid{display:grid;grid-template-columns:1fr 2fr;gap:20px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px}
+.card h2{margin:0 0 8px;font-size:20px}
+.muted{color:var(--muted);font-size:14px;line-height:1.6}
+.location{font-size:30px;font-weight:750;margin:15px 0 5px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+.stat{background:#f8fafc;border:1px solid var(--border);padding:15px;border-radius:13px}
+.stat b{display:block;font-size:22px;margin-top:4px}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0}
+button{border:0;border-radius:10px;background:var(--primary);color:white;padding:11px 16px;font-weight:650;cursor:pointer}
+button:hover{background:var(--primary2)}
+.status{font-size:13px;color:var(--muted)}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{text-align:left;padding:13px 15px;border-bottom:1px solid var(--border)}
+th{background:#f8fafc;font-size:13px;color:#475467}
+td{font-size:14px}
+tr:last-child td{border-bottom:0}
+.temp{font-weight:700}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:20px 0 35px}
+.error{padding:14px;border-radius:10px;background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.profile{grid-template-columns:1fr}header{padding-top:30px}}
+</style>
+</head>
+<body>
+<header>
+<div class="container">
+  <span class="badge">Tugas 2 Pemograman Berbasis Perangkat Bergerak</span>
+  <h1>Data Cuaca Jakarta</h1>
+  <p class="subtitle">Aplikasi sederhana untuk mengambil dan menampilkan prakiraan temperatur per jam </p>
+  <div class="profile">
+    <div><small>Nama</small><strong>Muhamad Asep</strong></div>
+    <div><small>NIM</small><strong>052543277</strong></div>
+    <div><small>Program Studi</small><strong>S1 Sistem Informasi</strong></div>
+  </div>
+</div>
+</header>
+
+<main class="container">
+  <section class="grid">
+    <div class="card">
+      <h2>Informasi Lokasi</h2>
+      <div class="location">Jakarta</div>
+      <div class="muted">Latitude: -6.2<br>Longitude: 106.8</div>
+      <div class="stats">
+        <div class="stat"><span class="muted">Data tersedia</span><b id="count">-</b></div>
+        <div class="stat"><span class="muted">Suhu saat ini</span><b id="current">-</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Data Temperatur Per Jam</h2>
+      <p class="muted">Field yang ditampilkan: <b>time</b> dan <b>temperature_2m</b>.</p>
+      <div class="actions">
+        <span class="status" id="status">Mengambil data...</span>
+        <button onclick="loadWeather()">↻ Muat Ulang</button>
+      </div>
+      <div id="output"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Tugas 2 Pemograman Berbasis Perangkat Bergerak • Muhamad Asep • NIM:052543277 • Program Studi: S1 Sistem Informasi
+</footer>
+
+<script>
+const API_URL = "https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&hourly=temperature_2m";
+
+function formatTime(value){
+  const [date,time] = value.split("T");
+  return `${date} ${time}`;
+}
+
+async function loadWeather(){
+  const status = document.getElementById("status");
+  const output = document.getElementById("output");
+  status.textContent = "Memuat data dari API...";
+  output.innerHTML = "";
+  try{
+    const response = await fetch(API_URL);
+    if(!response.ok) throw new Error("HTTP " + response.status);
+    const data = await response.json();
+
+    const times = data.hourly.time || [];
+    const temps = data.hourly.temperature_2m || [];
+    document.getElementById("count").textContent = times.length + " jam";
+
+    if(temps.length){
+      document.getElementById("current").textContent = temps[0] + " °C";
+    }
+
+    let rows = "";
+    for(let i=0;i<times.length;i++){
+      rows += `<tr>
+        <td>${formatTime(times[i])}</td>
+        <td class="temp">${temps[i] ?? "-"} °C</td>
+      </tr>`;
+    }
+
+    output.innerHTML = `<div class="table-wrap">
+      <table>
+        <thead><tr><th>Waktu Pengukuran</th><th>Temperatur (°C)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+    status.textContent = "Data berhasil diperbarui.";
+  }catch(error){
+    status.textContent = "Gagal mengambil data.";
+    output.innerHTML = `<div class="error">Tidak dapat mengambil data cuaca. Pastikan koneksi internet aktif, lalu tekan <b>Muat Ulang</b>.<br><small>${error.message}</small></div>`;
+  }
+}
+loadWeather();
+</script>
+</body>
+</html>
